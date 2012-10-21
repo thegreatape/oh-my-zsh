@@ -12,12 +12,20 @@ parse_git_dirty() {
         SUBMODULE_SYNTAX="--ignore-submodules=dirty"
   fi
   if [[ -n $(git status -s ${SUBMODULE_SYNTAX}  2> /dev/null) ]]; then
-    echo "$ZSH_THEME_GIT_PROMPT_DIRTY"
+    echo "$(num_git_commits_ahead)$ZSH_THEME_GIT_PROMPT_DIRTY"
   else
-    echo "$ZSH_THEME_GIT_PROMPT_CLEAN"
+    echo "$(num_git_commits_ahead)$ZSH_THEME_GIT_PROMPT_CLEAN"
   fi
 }
 
+
+# get the number of commits ahead of the tracking branch, if any
+num_git_commits_ahead() {
+    num=$(git status 2> /dev/null | grep "Your branch is ahead of" | awk '{split($0,a," "); print a[9];}' 2> /dev/null) || return
+    if [[ "$num" != "" ]]; then
+	echo " +$num"
+    fi
+}
 
 # Checks if there are commits ahead from remote
 function git_prompt_ahead() {
