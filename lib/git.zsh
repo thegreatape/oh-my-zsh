@@ -21,7 +21,7 @@ parse_git_dirty() {
 
 # get the number of commits ahead of the tracking branch, if any
 num_git_commits_ahead() {
-    num=$(git status 2> /dev/null | grep "Your branch is ahead of" | awk '{split($0,a," "); print a[9];}' 2> /dev/null) || return
+    num=$(git status 2> /dev/null | grep "Your branch is ahead of" | awk '{split($0,a," "); print a[8];}' 2> /dev/null) || return
     if [[ "$num" != "" ]]; then
 	echo " +$num"
     fi
