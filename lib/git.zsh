@@ -4,27 +4,26 @@ function git_prompt_info() {
   echo "$ZSH_THEME_GIT_PROMPT_PREFIX${ref#refs/heads/}$(parse_git_dirty)$ZSH_THEME_GIT_PROMPT_SUFFIX"
 }
 
-
 # Checks if working tree is dirty
 parse_git_dirty() {
   local SUBMODULE_SYNTAX=''
-  if [[ $POST_1_7_2_GIT -gt 0 ]]; then
-        SUBMODULE_SYNTAX="--ignore-submodules=dirty"
-  fi
-  if [[ -n $(git status -s ${SUBMODULE_SYNTAX}  2> /dev/null) ]]; then
-    echo "$(num_git_commits_ahead)$ZSH_THEME_GIT_PROMPT_DIRTY"
+  local STATUS="$(git status --ignore-submodules=dirty 2> /dev/null)"
+  num_commits_ahead=$(echo $STATUS | grep "Your branch is ahead of" | awk '{split($0,a," "); print a[8];}' 2> /dev/null) || return
+
+  if [[ -n $STATUS ]]; then
+    echo "$NUM_COMMITS_AHEAD$ZSH_THEME_GIT_PROMPT_DIRTY"
   else
-    echo "$(num_git_commits_ahead)$ZSH_THEME_GIT_PROMPT_CLEAN"
+    echo "$NUM_COMMITS_AHEAD$ZSH_THEME_GIT_PROMPT_CLEAN"
   fi
 }
 
 
 # get the number of commits ahead of the tracking branch, if any
 num_git_commits_ahead() {
-    num=$(git status 2> /dev/null | grep "Your branch is ahead of" | awk '{split($0,a," "); print a[8];}' 2> /dev/null) || return
-    if [[ "$num" != "" ]]; then
-	echo " +$num"
-    fi
+  num=$(git status 2> /dev/null | grep "Your branch is ahead of" | awk '{split($0,a," "); print a[8];}' 2> /dev/null) || return
+  if [[ "$num" != "" ]]; then
+    echo " +$num"
+  fi
 }
 
 # Checks if there are commits ahead from remote
@@ -79,7 +78,7 @@ git_prompt_status() {
 
 #compare the provided version of git to the version installed and on path
 #prints 1 if input version <= installed version
-#prints -1 otherwise 
+#prints -1 otherwise
 function git_compare_version() {
   local INPUT_GIT_VERSION=$1;
   local INSTALLED_GIT_VERSION
